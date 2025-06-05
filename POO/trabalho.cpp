@@ -1,14 +1,55 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <time.h>
 
 using namespace std;
+class Desconto {
+    public:
+        virtual float descontar()=0;
+};
+
+class SemDesconto:public Desconto {   
+    public:
+        float descontar() override{
+            return 0.0;
+        }
+};
+
+class DescontoVIP:public Desconto {   
+    public:
+        float descontar() override{
+            return 0.1;
+        }
+};
+
+class DescontoBaixaTemporada:public Desconto {   
+    public:
+        float descontar() override{
+            return 0.2;
+        }
+};
+
+class DescontoFeriado:public Desconto {   
+    public:
+        float descontar() override{
+            return 0.15;
+        }
+};
 
 class Atendente{
     private:
         string user;
         string senha;
     public:
+        Atendente(){
+            setUser("");
+            setSenha("");
+        }
+        Atendente(string user, string senha){
+            setUser(user);
+            setSenha(senha);
+        }
         string getUser(){
             return this->user;
         }
@@ -32,6 +73,18 @@ class Cliente{
         int idade;
         string CPF;
     public:
+        Cliente(){
+            setNome("");
+            setIdade(0);
+            setCPF("");
+        }
+        Cliente(string nome, int idade, string CPF){
+            setNome(nome);
+            setIdade(idade);
+            setCPF(CPF);
+        }
+
+        //getters e setters
         string getNome(){
             return this->nome;
         }
@@ -55,126 +108,386 @@ class Cliente{
         void setCPF(string CPF){
             this->CPF = CPF;
         }
+
+        //método para exibir as informações do cliente
+        void exibirCliente(){
+            cout << "Nome: " << this->nome << endl;
+            cout << "Idade: " << this->idade << endl;
+            cout << "CPF: " << this->CPF << endl;
+        }
+};
+
+class Quarto{
+    private:
+        string tipo;
+        float preco;
+        bool disponivel;
+
+    public:
+        Quarto(){
+            setTipo("");
+            setPreco(0.0);
+            setDisponivel(false);
+        }
+
+        Quarto(string tipo, float preco, bool disponivel){
+            setTipo(tipo);
+            setPreco(preco);
+            setDisponivel(disponivel);
+        }
+
+        string getTipo(){
+            return this->tipo;
+        }
+
+        float getPreco(){
+            return this->preco;
+        }
+
+        bool isDisponivel(){
+            return this->disponivel;
+        }
+
+        void setTipo(string tipo){
+            this->tipo = tipo;
+        }
+
+        void setPreco(float preco){
+            this->preco = preco;
+        }
+
+        void setDisponivel(bool disponivel){
+            this->disponivel = disponivel;
+        }
+};
+
+class Localidade{
+    private:
+        string nome;
+        Quarto quarto[5];
+        int idLocal;
+    public:
+        Localidade(){
+            setNome("");
+            for(int i = 0; i < 5; i++){
+                quarto[i] = Quarto();
+            }
+        }
+
+        Localidade(string nome, Quarto quartos[5], int id){
+            setNome(nome);
+            for(int i = 0; i < 5; i++){
+                setQuarto(quartos[i], i);
+            }
+            setIdLocal(id);
+        }
+
+        string getNome(){
+            return this->nome;
+        }  
+
+        Quarto& getQuarto(int index){
+            return this->quarto[index];
+        }
+
+        int getIdLocal(){
+            return this->idLocal;
+        }
+
+        void setNome(string nome){
+            this->nome = nome;
+        }
+
+        void setQuarto(Quarto novoQuarto, int index){
+            this->quarto[index] = novoQuarto;
+        }
+
+        void setIdLocal(int id){
+            this->idLocal = id;
+        }
 };
 
 class Reserva{
     private:
-        string localidade;
-        string dataCheckIn;
+        int id;
+        Localidade localidade;
+        int dia, mes, ano;
         int quantDias;
-        string tipoQuarto;
+        Quarto quarto;
         Cliente newCliente;
-        float desconto;
+        bool disponivel;
+        Desconto *desconto;
     public:
-        string getLocalidade(){
-            return this->localidade;
+        Reserva(){
+            setID(0);
+            setLocalidade(Localidade());
+            setDataCheckIn(0, 0, 0);
+            setQuantDias(0);
+            setQuarto(Quarto());
+            setCliente(Cliente());
+            this->disponivel = true;
+            this->desconto = nullptr; // Inicializa o ponteiro de desconto como nulo
         }
 
-        string getDataCheckIn(){
-            return this->dataCheckIn;
+        Reserva(int ID, Localidade localidade, int dia, int mes, int ano, int quantDias, Quarto quarto, Cliente cliente){
+            setID(ID);
+            setLocalidade(localidade);
+            setDataCheckIn(dia, mes, ano);
+            setQuantDias(quantDias);
+            setQuarto(quarto);
+            setCliente(cliente);
+            this->disponivel = true;
+        }
+
+        int getID(){
+            return this->id;
+        }
+
+        Quarto& getQuarto(){
+            return this->quarto;
+        }
+       
+        Localidade& getLocalidade(){
+            return this->localidade;
+        }
+        
+        int getDia(){
+            return this->dia;
+        }
+
+        int getMes(){
+            return this->mes;
+        }
+
+        int getAno(){
+            return this->ano;
         }
 
         int getQuantDias(){
             return this->quantDias;
         }
-
-        string getTipoQuarto(){
-            return this->tipoQuarto;
-        }
-
-        Cliente getCliente(){
+        
+        Cliente& getCliente(){
             return this->newCliente;
         }
-
+        
         float getDesconto(){
-            return this->desconto;
+
+            return this->desconto->descontar();
         }
 
-        void setLocalidade(string localidade){
+        void setID(int id){
+            this->id = id;
+        }
+        
+        void setQuarto(Quarto quarto){
+            this->quarto = quarto;
+            this->quarto.setDisponivel(false);
+        }
+
+        void setLocalidade(Localidade localidade){
             this->localidade = localidade;
         }
 
-        void setDataCheckIn(string dataCheckIn){
-            this->dataCheckIn = dataCheckIn;
+        void setDataCheckIn(int dia, int mes, int ano){
+            this->dia = dia;
+            this->mes = mes;
+            this->ano = ano;
         }
 
         void setQuantDias(int quantDias){
             this->quantDias = quantDias;
         }
 
-        void setTipoQuarto(string tipoQuarto){
-            this->tipoQuarto = tipoQuarto;
-        }
-
         void setCliente(Cliente cliente){
             this->newCliente = cliente;
+        }   
+        
+        void executarDesconto(){
+            if(this->desconto!=nullptr){
+                desconto->descontar();
+            }
+            else{
+                cout<<"Nenhuma desconto foi definido"<<endl;
+            }
         }
 
-        void setDesconto(float desconto){
-            this->desconto = desconto;
-        }       
-
+        void setDesconto(Desconto *novoDesconto){
+            this->desconto=novoDesconto;
+        }
 };
+
+void preDeclaracao(Atendente atendentes[], Quarto quarto[], Localidade local[]){
+    //declaração dos logins e senhas dos atendentes para verificar autenticação do usuário
+    atendentes[0] = Atendente("atendente1", "senha1");
+    atendentes[1] = Atendente("atendente2", "senha2");
+    atendentes[2] = Atendente("atendente3", "senha3");
+    atendentes[3] = Atendente("atendente4", "senha4");
+    
+    //declaração dos tipos de quartos e seus preços
+    quarto[0] = Quarto("Solteiro", 200.00, true);
+    quarto[1] = Quarto("Duplo", 300.00, true);
+    quarto[2] = Quarto("Casal", 350.00, true);
+    quarto[3] = Quarto("Triplo", 450.00, true);
+    quarto[4] = Quarto("Quadruplo", 550.00, true);
+
+    //declaração das localidades e seus quartos e reservas
+    local[0] = Localidade("Jericoacoara", quarto, 0);
+    local[1] = Localidade("Canoa Quebrada", quarto, 1);
+    local[2] = Localidade("Cumbuco", quarto, 2);
+
+}
+
+void autenticar(Atendente atendentes[]){
+    //verifica se o login e senha inseridos são iguais a uma das opções
+    string login, senha;
+    bool autenticado = false;
+
+    while(!autenticado){
+        cout << "Login: ";
+        cin >> login;
+        cout << "Senha: ";
+        cin >> senha;
+    
+        //caso o login e senha inseridos forem iguais a uma das opções
+        for(int i = 0; i < 4; i++){
+            if(login == atendentes[i].getUser() && senha == atendentes[i].getSenha()){
+                autenticado = true;
+                cout << "\nBem Vindo " << atendentes[i].getUser() << " ao sistema!" << endl;
+            }
+        }
+        
+        //caso não for autenticado, a variavel booleana não se altera
+        if(!autenticado){
+            cout << "\nAutenticacao invalida. Tente novamente." << endl;
+        }
+    }
+}
+
+void disponibilidadeQuartos(Reserva reserva[], Localidade locais[], int id){
+    int opcao;
+    string data;
+    int dia, mes, ano;
+    bool dataValida;
+
+    cout << "Disponibilidade de quartos" << endl;
+    cout << "------------------------------------" << endl;
+    do{
+        cout << "Para qual localidade deseja verificar a disponibilidade?" << endl;
+        cout << "1- Jericoacoara\n2- Canoa Quebrada\n3- Cumbuco" << endl;
+        cin >> opcao;
+        if(opcao < 1 || opcao > 3){
+            cout << "Opcao invalida. Tente novamente." << endl;
+        }
+    }while(opcao < 1 || opcao > 3);
+    cout << "------------------------------------" << endl;
+    
+    cout << "Para qual data deseja verificar a disponibilidade?" << endl;
+    do{
+        cout << "Data (DD/MM/AAAA): ";
+        cin >> data;
+        dataValida = true;
+
+        //verifica se a data está no formato correto
+        if(data.length() != 10 || data[2] != '/' || data[5] != '/'){
+            cout << "Data invalida. Tente novamente." << endl;
+            dataValida = false;
+        }
+    }while(!dataValida);
+    sscanf(data.c_str(), "%d/%d/%d", &dia, &mes, &ano);
+    cout << "------------------------------------" << endl;
+    
+    cout << "Localidade: " << locais[opcao - 1].getNome() << endl;
+    cout << "Data: " << dia << "/" << mes << "/" << ano << endl;
+    cout << "Quartos disponiveis: " << endl;
+
+    if(id == 0){
+        for(int i = 0; i < 5; i++){
+            if(locais[opcao - 1].getQuarto(i).isDisponivel()){
+                cout << "- " << locais[opcao - 1].getQuarto(i).getTipo() << " ---- R$ " << locais[opcao - 1].getQuarto(i).getPreco() << endl;
+            }
+            else{
+                cout << "- " << "\033[9m" << locais[opcao - 1].getQuarto(i).getTipo() << "\033[0m" << " ---- " << " (Indisponivel)" << endl;
+            }
+        }
+    }else{
+        for(int j = 0; j < 5; j++){
+            for(int i = 0; i < id; i++){
+                if(reserva[i].getDia() == dia && reserva[i].getMes() == mes && reserva[i].getAno() == ano && reserva[i].getLocalidade().getIdLocal() == locais[opcao - 1].getIdLocal()){
+                    if(reserva[i].getQuarto().getTipo() == locais[opcao - 1].getQuarto(j).getTipo()){
+                        cout << "- " << "\033[9m" << locais[opcao - 1].getQuarto(j).getTipo() << "\033[0m" << " ---- " << " (Indisponivel)" << endl;
+                    }
+                    else{
+                        cout << "- " << locais[opcao - 1].getQuarto(j).getTipo() << " ---- R$ " << locais[opcao - 1].getQuarto(j).getPreco() << endl;
+                    }
+                }
+            }
+        }
+    }
+    
+}
+
+bool cadastraCliente(Cliente cliente[], int id){
+    string nome, cpf;
+    int idade;
+
+    cout << "Sobre o cliente" << endl;
+    cout << "**Cliente: ";
+    cin >> nome;
+    
+    cout << "**Idade: ";
+    cin >> idade;
+    if (idade < 18){
+        cout << "Menor de idade, nao pode efetuar reserva" << endl;
+        return false;
+    }
+
+    cpf = "";
+    while(cpf.length() != 14 || cpf[3] != '.' || cpf[7] != '.' || cpf[11] != '-'){
+        cout << "**CPF (999.999.999-99): ";
+        cin >> cpf;
+        if(cpf.length() != 14 || cpf[3] != '.' || cpf[7] != '.' || cpf[11] != '-'){
+            cout << "CPF invalido. Tente novamente." << endl;
+        }
+    }
+
+    cliente[id] = Cliente(nome, idade, cpf);
+    return true;
+}
 
 int main(){
     //objetos que serão utilizados
     Atendente atendentes[4];
-    Cliente clientes;
-    Reserva reserva;
+    Cliente clientes[20];
+    Reserva reserva[20];
+    Quarto quarto[5];
+    Localidade local[3];
+    SemDesconto semDesconto;
+    DescontoVIP descontoVIP;
+    DescontoBaixaTemporada descontoBaixaTemporada;
+    DescontoFeriado descontoFeriado;
     
-    //variáveis usadas para receber as informações do usuário
-    string login, senha;
-    string nome, cpf;
-    string localidade, data, tipo;
-    bool autenticado = false;
-    int menu, opcoes;
-    int idade;
-    int quantDias;
-    float desconto;
-
-    //declaração dos logins e senhas dos atendentes para verificar autenticação do usuário
-    atendentes[0].setUser("atendente1");
-    atendentes[0].setSenha("senha1");
-
-    atendentes[1].setUser("atendente2");
-    atendentes[1].setSenha("senha2");
-
-    atendentes[2].setUser("atendente3");
-    atendentes[2].setSenha("senha3");
-
-    atendentes[3].setUser("atendente4");
-    atendentes[3].setSenha("senha4");
+    //usadas para receber as informações do usuário
+    string login, senha, nome, data;
+    int checkoutDia, checkoutMes, checkoutAno;
+    int menu, opcoes, quantDias, dia, mes, ano;
+    int id = 0;
+    int opcaoLocal = 0, opcaoQuarto = 0;
     
+    preDeclaracao(atendentes, quarto, local);
+    //---------------------------------------------------------------------------------------------------
     //início do sistema
     cout << "------------------------------------" << endl;
     cout << "Bem vindo a rede de hoteis Paradise!" << endl;
     cout << "------------------------------------" << endl;
     
     //verifica autenticação enquanto for incorreto
-    while(!autenticado){
-        cout << "Login: ";
-        cin >> login;
-        cout << "Senha: ";
-        cin >> senha;
+    autenticar(atendentes);
 
-        //caso o login e senha inseridos forem iguais a uma das opções
-        for(int i = 0; i < 4; i++){
-            if(login == atendentes[i].getUser() && senha == atendentes[i].getSenha()){
-                autenticado = true;
-                cout << "\nBem Vindo " << atendentes[i].getUser() << " ao sistema!" << endl;
-                cout << "------------------------------------" << endl;
-            }
-        }
-
-        //caso não for autenticado, a variavel booleana não se altera
-        if(!autenticado){
-            cout << "\nAutenticacao invalida. Tente novamente." << endl;
-        }
-    }
-    
     //caso autenticas, começa o menu de opções
-    cout << "MENU DO SISTEMA DE RESERVAS DO HOTEL PARADISE" << endl;
     do{
+        cout << "------------------------------------" << endl;
+        cout << "MENU DO SISTEMA DE RESERVAS DO HOTEL PARADISE" << endl;
         cout << "1- Verificar disponibilidade dos quartos" << endl;
         cout << "2- Efetuar nova reserva" << endl;
         cout << "3- Sair" << endl;
@@ -185,84 +498,169 @@ int main(){
         switch(menu){
             //caso de verificação de disponibilidade de quartos para reserva
             case 1:
-                cout << "disponibilidade de quartos" << endl;
+                disponibilidadeQuartos(reserva, local, id);
                 break;
             //caso de executar uma nova reserva
             case 2:
                 cout << "Nova Reserva" << endl;
                 cout << "------------------------------------" << endl;
-                cout << "Sobre o cliente" << endl;
-                cout << "**Cliente: ";
-                cin >> nome;
-                clientes.setNome(nome);
-                
-                cout << "**Idade: ";
-                cin >> idade;
-                if (idade < 18){
-                    cout << "Menor de idade, nao pode efetuar reserva" << endl;
-                    break;
-                }
-                clientes.setIdade(idade);
-                
-                cout << "**CPF (999.999.999-99): ";
-                cin >> cpf;
-                clientes.setCPF(cpf);
-            
-                reserva.setCliente(clientes);
-                
+                if(!cadastraCliente(clientes, id)) break;
+                cout << "------------------------------------" << endl;
                 cout << "\nSobre a reserva" << endl;
-                while(opcoes != 1 && opcoes != 2 && opcoes != 3){
+            
+                do{
                     cout << "**Lugares disponiveis:\n  1- Jericoacoara\n  2- Canoa Quebrada\n  3- Cumbuco" << endl;
                     cout << "  Para qual dos lugares o cliente deseja ir: ";
                     cin >> opcoes;
-                    
-                    if (opcoes == 1) localidade = "Jericoacoara";
-                    else if (opcoes == 2) localidade = "Canoa Quebrada";
-                    else if (opcoes == 3) localidade = "Cumbuco";
-                    else cout << "Opcao invalida. Tente novamente\n" << endl;
-                }
-                reserva.setLocalidade(localidade);
-    
-                cout << "**Data do Check-In (DD/MM/AAAA): ";
-                cin >> data;
-                reserva.setDataCheckIn(data);
 
+                    if(opcoes < 1 || opcoes > 3) cout << "Opcao invalida. Tente novamente\n" << endl;
+                    else opcaoLocal = opcoes - 1;
+
+                }while(opcoes != 1 && opcoes != 2 && opcoes != 3);
+                
+                bool dataValida;
+                do{
+                    do{
+                        cout << "**Data do Check-In (DD/MM/AAAA): ";
+                        cin >> data;
+                        dataValida = true;
+                        
+                        //verifica se a data está no formato correto
+                        if(data.length() != 10 || data[2] != '/' || data[5] != '/'){
+                            cout << "Data invalida. Tente novamente." << endl;
+                            dataValida = false;
+                        }
+                    }while(!dataValida);
+                    
+                    //verifica se o dia, mês e ano são válidos
+                    sscanf(data.c_str(), "%d/%d/%d", &dia, &mes, &ano);
+                    
+                    if(mes == 2 && dia > 28){
+                        cout << "Mes invalido. Tente novamente." << endl;
+                        dataValida = false;
+                    }
+                    else if((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30){
+                        cout << "Mes invalido. Tente novamente." << endl;
+                        dataValida = false;
+                    }
+                    else if(mes < 1 || mes > 12 || dia < 1 || dia > 31){
+                        cout << "Data invalida. Tente novamente." << endl;
+                        dataValida = false;
+                    }
+                    else if(ano > 2025){
+                        cout << "Ano invalido. Tente novamente." << endl;
+                        dataValida = false;
+                    }
+                }while(!dataValida); // continua até que a data seja válida
+                
                 cout << "**Quantos dias de permanencia no hotel: ";
                 cin >> quantDias;
-                reserva.setQuantDias(quantDias);
-                
+
+                checkoutDia = (dia - 1) + quantDias;
+                checkoutMes = mes;
+                checkoutAno = ano;
+
+                if(checkoutDia > 31){
+                    checkoutDia -= 31;
+                    checkoutMes += 1;
+                    if(checkoutMes > 12){
+                        checkoutMes = 1;
+                        checkoutAno += 1;
+                    }
+                }
+                else if(checkoutDia > 30 && (checkoutMes == 4 || checkoutMes == 6 || checkoutMes == 9 || checkoutMes == 11)){
+                    checkoutDia -= 30;
+                    checkoutMes += 1;
+                    if(checkoutMes > 12){
+                        checkoutMes = 1;
+                        checkoutAno += 1;
+                    }
+                }
+                else if(checkoutDia > 28 && checkoutMes == 2){
+                    checkoutDia -= 28;
+                    checkoutMes += 1;
+                    if(checkoutMes > 12){
+                        checkoutMes = 1;
+                        checkoutAno += 1;
+                    }
+                }
+
+                cout << "Data de Check-In: " << dia << "/" << mes << "/" << ano << endl;
+                cout << "Data de Check-Out: " << checkoutDia << "/" << checkoutMes << "/" << checkoutAno << endl;
+                cout << "------------------------------------" << endl;
+
                 do{
                     cout << "**Tipos de Quarto" << endl;
-                    cout << "  1- Solteiro (uma cama de solteiro)\n  2- Duplo (duas camas de solteiro)\n  3- Casal (uma cama de casal)\n  4- Triplo (uma cama de casal e uma de solteiro ou tres camas de solteiro)\n  5- Quadruplo (duas camas de casal ou quatro camas de solteiro)" << endl;
+                    cout << "  1- Solteiro (uma cama de solteiro) ------------------------------------------- R$ 200,00\n  2- Duplo (duas camas de solteiro) -------------------------------------------- R$ 300,00\n  3- Casal (uma cama de casal) ------------------------------------------------- R$ 350,00\n  4- Triplo (uma cama de casal e uma de solteiro ou tres camas de solteiro) ---- R$ 450,00\n  5- Quadruplo (duas camas de casal ou quatro camas de solteiro) --------------- R$ 550,00" << endl;
                     cout << "  Qual opcao o cliente deseja: ";
                     cin >> opcoes;
-        
-                    if(opcoes == 1) tipo = "Solteiro";
-                    else if(opcoes == 2) tipo = "Duplo";
-                    else if(opcoes == 3) tipo = "Casal";
-                    else if(opcoes == 4) tipo = "Triplo";
-                    else if(opcoes == 5) tipo = "Quadruplo";
-                    else cout << "Opcao invalida. Tente novamente\n" << endl;
+
+                    if(local[opcaoLocal].getQuarto(opcoes-1).isDisponivel()){
+                        opcaoQuarto = opcoes - 1;
+                        local[opcaoLocal].getQuarto(opcaoQuarto).setDisponivel(false);                        
+                    }
+                    else{
+                        cout << "Quarto indisponivel. Nao foi possivel efetuar a reserva." << endl;
+                        cout << "Gostaria de tentar novamente? (1- Sim, 0- Nao): ";
+                        cin >> opcoes;
+                        if(opcoes == 1){
+                            opcoes = 6; // Forçar o loop a continuar
+                        }
+                        else if(opcoes == 0){
+                            cout << "Reserva cancelada." << endl;
+                            break;
+                        }
+                    }
+
                 }while(opcoes != 1 && opcoes != 2 && opcoes != 3 && opcoes != 4 && opcoes != 5);
-                reserva.setTipoQuarto(tipo);
+                if(opcoes == 0)break; // Se o usuário escolheu cancelar a reserva, sai do loop
+                
+                for(int i = 0; i < id; i++){
+                    dataValida = true;
+                    //caso a reserva for na mesma data, localidade e tipo de quarto, não permite a reserva
+                    if(reserva[i].getDia() == reserva[id].getDia() && reserva[i].getMes() == reserva[id].getMes() && reserva[i].getAno() == reserva[id].getAno() && reserva[i].getLocalidade().getIdLocal() == local[opcaoLocal].getIdLocal() && reserva[i].getQuarto().getTipo() == local[opcaoLocal].getQuarto(opcaoQuarto).getTipo()){
+                        cout << "Quarto ja reservado para essa data. Tente novamente." << endl;
+                        dataValida = false;
+                        break;
+                    }
+                }
+                if(!dataValida) break; // Se a data não for válida, cancela a reserva
+                reserva[id] = Reserva(id+1, local[opcaoLocal], dia, mes, ano, quantDias, local[opcaoLocal].getQuarto(opcaoQuarto), clientes[id]);
                 
                 do{
                     cout << "**Tipos de Desconto" << endl;
-                    cout << "  1- Sem desconto\n  2- Clientes VIP: 10\% de desconto.\n  3- Baixa temporada: 20\% de desconto.\n  4- Promocao de feriados especificos: 15\% de desconto." << endl;
+                    cout << "  1- Cliente Normal: Sem desconto\n  2- Clientes VIP: 10\% de desconto." << endl;
                     cout << "Qual opcao o cliente se encaixa: ";
                     cin >> opcoes;
 
-                    if(opcoes == 1) desconto = 0;
-                    else if(opcoes == 2) desconto = 0.10;
-                    else if(opcoes == 3) desconto = 0.20;
-                    else if(opcoes == 4) desconto = 0.15;
-                    else cout << "Opcao invalida. Tente novamente\n" << endl;
+                    if(reserva[id].getMes() == 5 || reserva[id].getMes() == 6 || reserva[id].getMes() == 7 || reserva[id].getMes() == 8 || reserva[id].getMes() == 9){
+                        reserva[id].setDesconto(&descontoBaixaTemporada);
+                        cout << "Desconto de baixa temporada aplicado: 20%" << endl;
+                    }
+                    else if((reserva[id].getDia() == 25 && reserva[id].getMes() == 12)||(reserva[id].getDia() == 1 && reserva[id].getMes() == 1)){
+                        reserva[id].setDesconto(&descontoFeriado);
+                        cout << "Desconto de feriado aplicado: 15%" << endl;
+                    }
+                    else if(opcoes == 1){
+                        reserva[id].setDesconto(&semDesconto);
+                        cout << "Cliente normal, sem desconto aplicado." << endl;
+                    }
+                    else if(opcoes == 2) {
+                        reserva[id].setDesconto(&descontoVIP);
+                        cout << "Desconto VIP aplicado: 10%" << endl;
+                    }
+
+                    if(opcoes < 1 || opcoes > 2){
+                        cout << "Opcao invalida. Tente novamente." << endl;
+                    }
                 }while(opcoes != 1 && opcoes != 2 && opcoes != 3 && opcoes != 4);
-                reserva.setDesconto(desconto);
-            
+                
                 cout << "------------------------------------" << endl;
-                cout << "Cliente: " << reserva.getCliente().getNome() << endl;
+                cout << "Reserva efetuada com sucesso!" << endl;
+
+                id++;
                 break;
+
             //caso de sair do sistema
             case 3:
                 //salvar todas as informações num arquivo .txt
