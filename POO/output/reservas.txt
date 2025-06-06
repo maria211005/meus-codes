@@ -1,10 +1,13 @@
-Reserva 1
-Localidade: Canoa Quebrada
-Cliente: maria
-Data de Check-In: 21/10/2005
-Data de Check-Out: 23/10/2005
-Quarto reservado: Duplo
-Preço cheio: R$ 900.00
-Desconto aplicado: 0.00%
-Preco total: R$ 900.00
-------------------------------------
+1
+atendente1
+maria
+121.121.121-21
+Canoa Quebrada
+Casal
+21/12/2025
+2
+0.00%
+700.00
+233.33
+Sim
+
